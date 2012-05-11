@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/webflow
+                        http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+
+	<!-- * Not necessary to define MyModel as @Component! 
+	     * myModel will be registered as a spring bean and is injectable into spring app ctx -->
+	<var name="myModel" class="be.faros.webflow.MyModel"/>
+
+	<view-state id="enterMainFlow" model="myModel">
+		<transition on="next" to="mySubFlow" />
+	</view-state>
+
+	<subflow-state id="mySubFlow" subflow="sub">
+		<input  name="inputVar" value="myModel.myInput"/>
+		<output name="outputVar"/>
+
+		<transition on="subFlowFinished" to="parentFlowFinished"/>
+		<transition on="invalidAccountNr" to="enterMainFlow">
+			<!-- Must be set on flashScope, flowScope, conversationScope(not possible: requestScope or viewScope because we're not in a view state) -->
+			<set name="flashScope.warningMsg" value="'Account not found'"/>
+		</transition>
+	</subflow-state>
+
+	<!-- * No view attr defined? -> refreshes current flow 
+	     * view="end.jsp" -->
+	<end-state id="parentFlowFinished"/>
+
+<!-- end.jsp ?? Ik dacht dat hij dit ook zou resolven adhv de standaard webflow viewresolver...  -->
+<!-- Welke is de default viewresolver van webflow? Hoe kan je die configureren in je lijst van viewresolvers ? -->
+
+</flow>

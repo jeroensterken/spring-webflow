@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/webflow
+        http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+
+	<input name="inputVar"/>
+	
+	<view-state id="enterSubFlow">
+		<transition on="exitSubFlow" to="subFlowFinished" />
+	</view-state>
+	
+	<decision-state id="checkAccountExists">
+		<if test="accountManager.findAccount(inputVar) != null" 
+		    then="subFlowFinished" 
+		    else="invalidAccountNr"/>
+	</decision-state>
+
+	<action-state id="checkAccountExists_REPLACED_BY_DECISSION_STATE">
+		<!-- set -> always returns true
+		     Je moet scope opgeven -> standaard = request scope (onvoldoende hier) -->
+		<set name="flowScope.tempOutVar" value="inputVar"/>
+		
+		<!-- Necessary to define result in flowScope (default would be requestScope). -->
+		<evaluate expression="accountManager.findAccount(inputVar)" result="flowScope.acc"/>
+		<evaluate expression="acc != null"/>
+
+		<transition on="yes" to="subFlowFinished"/>
+		<!-- If transition not defined -> 500 server error -->
+		<transition on="no" to="invalidAccountNr"/>
+	</action-state>
+
+	<end-state id="invalidAccountNr"/>
+
+	<end-state id="subFlowFinished">
+		<on-entry>
+			<set name="flowScope.tempOutVar" value="inputVar"/>
+		</on-entry>
+		<output name="outputVar" value="tempOutVar"/>
+	</end-state>
+
+</flow>
